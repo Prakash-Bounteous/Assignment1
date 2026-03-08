@@ -9,7 +9,7 @@ import java.util.UUID;
 class Create100Files {
     Create100Files() throws IOException {
 
-        String folderPath = "C:\\Users\\KadamanchiPrakashRaj\\SB_Assignments\\Assignment1";
+        String folderPath = "C:\\Users\\KadamanchiPrakashRaj\\SB_Assignments\\Files\\";
         Files.createDirectories(Paths.get(folderPath));
 
         for (int i = 1; i <= 100; i++) {
