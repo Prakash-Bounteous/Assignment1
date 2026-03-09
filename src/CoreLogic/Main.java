@@ -1,20 +1,23 @@
-
 package CoreLogic;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 public class Main {
 
     public static void main(String[] args) {
 
+        long startTime = System.currentTimeMillis();
+
         try {
 
-            long startTime = System.currentTimeMillis();
-
             File directory = new File("../Files");
+
+            if (!directory.exists() || !directory.isDirectory()) {
+                System.out.println("Directory does not exist.");
+                return;
+            }
 
             File[] files = directory.listFiles((dir, name) -> name.endsWith(".txt"));
 
@@ -23,9 +26,12 @@ public class Main {
                 return;
             }
 
+            //sorting files based on last modified time
+            Arrays.sort(files, (f1, f2) -> Long.compare(f2.lastModified(), f1.lastModified()));
+
             int maxFiles = Math.min(files.length, 100);
 
-            System.out.println("Processing files using 4 threads...\n");
+            System.out.println("Processing latest " + maxFiles + " files using 4 threads...\n");
 
             ExecutorService executor = Executors.newFixedThreadPool(4);
 
@@ -58,7 +64,8 @@ public class Main {
                     totalWords += result.getWordCount();
 
                 } catch (InterruptedException | ExecutionException e) {
-                    System.out.println("Error while processing a file: " + e.getMessage());
+
+                    System.out.println("Error processing a file: " + e.getMessage());
                 }
             }
 
@@ -71,12 +78,13 @@ public class Main {
             System.out.println("Total Lines: " + totalLines);
             System.out.println("Total Words: " + totalWords);
 
-            long endTime = System.currentTimeMillis();
-
-            System.out.println("\nTotal Execution Time: " + (endTime - startTime) + " ms");
-
         } catch (Exception e) {
+
             System.out.println("Unexpected error: " + e.getMessage());
         }
+
+        long endTime = System.currentTimeMillis();
+
+        System.out.println("\nTotal Execution Time: " + (endTime - startTime) + " ms");
     }
 }
