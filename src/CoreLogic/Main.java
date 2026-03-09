@@ -1,70 +1,73 @@
+
 package CoreLogic;
-import java.io.*;
-import java.util.*;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.*;
+
 public class Main {
-    static void main() {
-        long startTime = System.currentTimeMillis();
+
+    public static void main(String[] args) {
 
         try {
 
-            // Path to files folder
-            File directory = new File("../Files");
+            long startTime = System.currentTimeMillis();
 
-            if (!directory.exists() || !directory.isDirectory()) {
-                System.out.println("Directory not found!");
-                return;
-            }
+            File directory = new File("../Files");
 
             File[] files = directory.listFiles((dir, name) -> name.endsWith(".txt"));
 
             if (files == null || files.length == 0) {
-                System.out.println("No text files found.");
+                System.out.println("No files found.");
                 return;
             }
 
-            int totalFiles = 0;
-            int totalLines = 0;
-            int totalWords = 0;
-
-            // process maximum 100 files
             int maxFiles = Math.min(files.length, 100);
+
+            System.out.println("Processing files using 4 threads...\n");
+
+            ExecutorService executor = Executors.newFixedThreadPool(4);
+
+            List<Future<FileResult>> futures = new ArrayList<>();
 
             for (int i = 0; i < maxFiles; i++) {
 
-                File file = files[i];
+                FileTask task = new FileTask(files[i]);
 
-                int lineCount = 0;
-                int wordCount = 0;
+                Future<FileResult> future = executor.submit(task);
 
-                BufferedReader br = new BufferedReader(new FileReader(file));
-                String line;
-
-                while ((line = br.readLine()) != null) {
-
-                    lineCount++;
-
-                    if (!line.trim().isEmpty()) {
-                        String[] words = line.trim().split("\\s+");
-                        wordCount += words.length;
-                    }
-                }
-
-                br.close();
-
-                System.out.println("File: " + file.getName());
-                System.out.println("Lines: " + lineCount);
-                System.out.println("Words: " + wordCount);
-                System.out.println();
-
-                totalLines += lineCount;
-                totalWords += wordCount;
-                totalFiles++;
+                futures.add(future);
             }
+
+            int totalLines = 0;
+            int totalWords = 0;
+
+            for (Future<FileResult> future : futures) {
+
+                try {
+
+                    FileResult result = future.get();
+
+                    System.out.println("File: " + result.getFileName());
+                    System.out.println("Lines: " + result.getLineCount());
+                    System.out.println("Words: " + result.getWordCount());
+                    System.out.println();
+
+                    totalLines += result.getLineCount();
+                    totalWords += result.getWordCount();
+
+                } catch (InterruptedException | ExecutionException e) {
+                    System.out.println("Error while processing a file: " + e.getMessage());
+                }
+            }
+
+            executor.shutdown();
 
             System.out.println("----------------------------------");
             System.out.println("Summary");
             System.out.println("----------------------------------");
-            System.out.println("Total Files Processed: " + totalFiles);
+            System.out.println("Total Files Processed: " + maxFiles);
             System.out.println("Total Lines: " + totalLines);
             System.out.println("Total Words: " + totalWords);
 
@@ -73,7 +76,7 @@ public class Main {
             System.out.println("\nTotal Execution Time: " + (endTime - startTime) + " ms");
 
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println("Unexpected error: " + e.getMessage());
         }
     }
 }
