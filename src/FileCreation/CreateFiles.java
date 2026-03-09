@@ -6,17 +6,17 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
-class Create100Files {
-    Create100Files() throws IOException {
+class CreateFiles {
+    CreateFiles() throws IOException {
 
         String folderPath = "C:\\Users\\KadamanchiPrakashRaj\\SB_Assignments\\Files\\";
         Files.createDirectories(Paths.get(folderPath));
 
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 334; i++) {
 
             Path filePath = Paths.get(folderPath + "file" + i + ".txt");
 
-            int lines = i % 5;   // number of lines for this file
+            int lines = i % 5;   //number of lines in that file
 
             try (BufferedWriter writer = Files.newBufferedWriter(filePath)) {
 
@@ -29,7 +29,7 @@ class Create100Files {
                         String randomWord = UUID.randomUUID()
                                 .toString()
                                 .replace("-", " ")
-                                .split(" ")[0];   // take first word
+                                .split(" ")[0];
 
                         sb.append(randomWord);
 
